@@ -2,7 +2,7 @@
 
 **Authors:** Hyunseung Hwang, Seungeun Lee, Lucas Rosenblatt, Steven Euijong Whang, and Julia Stoyanovich
 
-**Paper:** [Available on arXiv]([https://arxiv.org/abs/2601.12654]))
+**Paper:** [Available on arXiv](https://arxiv.org/abs/2601.12654))
 
 ---
 

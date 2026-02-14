@@ -1,0 +1,21 @@
+# Cached files
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Output directories
+figures/
+figures2/
+results/
+log/
+
+# Large/sensitive files
+*.pdf
+
+# Old/experimental versions
+plot_refactored.py
+plot_refactored.py.new
+plot_violin2.py
+7. Plots_Clean.ipynb
+7. Plots_Violin2.ipynb
+run_array.sbatch

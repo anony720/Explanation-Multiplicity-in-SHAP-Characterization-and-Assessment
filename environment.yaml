@@ -1,0 +1,33 @@
+name: shap
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  
+  # ----------------------------------------------------------------
+  # 1. Base Libraries 
+  # ----------------------------------------------------------------
+  - numpy=2.0.2
+  - pandas=2.3.3      
+  - scikit-learn=1.6.1
+  - xgboost=2.1.4
+  - shap=0.48.0
+  
+  # ----------------------------------------------------------------
+  # 2. PyTorch & Specific Models
+  # ----------------------------------------------------------------
+  - pip:
+    # CUDA 11.8
+    - --extra-index-url https://download.pytorch.org/whl/cu118
+    
+    # PyTorch Core
+    - torch==2.4.1+cu118
+    - torchvision==0.19.1+cu118
+    - torchaudio==2.4.1+cu118
+    
+    # Other Models
+    - tabpfn==6.0.6
+    - rtdl-revisiting-models==0.0.2
+    - folktables==0.0.12

@@ -21,7 +21,8 @@ This repository provides the full experimental pipeline for characterizing and a
 3. **Metrics and baselines**: A hierarchy of disagreement metrics (ℓ₂, Top-k Jaccard, RBO) with randomized null models for calibrated interpretation.
 
 4. **Empirical evidence**: Extensive evaluation across three datasets, six model classes, and multiple confidence regimes.
-
+<img width="3604" height="1128" alt="diagram" src="https://github.com/user-attachments/assets/5c9c0f51-4508-456d-b5b2-e92af4072292" />
+<Overview of SHAP multiplicity>
 ---
 
 ## Datasets

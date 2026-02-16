@@ -8,20 +8,20 @@ import torch
 
 def set_global_seed(seed: int):
     """
-    Python, Numpy, PyTorch의 랜덤 시드를 고정합니다.
+    Fix random seeds for Python, NumPy, and PyTorch.
     """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
-    # 재현성을 위해 결정론적 연산 강제 (속도는 조금 느려질 수 있음)
+    # Force deterministic operations for reproducibility (may reduce speed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
 def clean_memory():
     """
-    CPU RAM과 GPU VRAM을 정리합니다.
+    Clean up CPU RAM and GPU VRAM.
     """
     # 1. Python Garbage Collection
     gc.collect()
@@ -33,7 +33,7 @@ def clean_memory():
 
 def load_data(dataset_name: str, data_dir: str = 'dataset'):
     """
-    dataset 폴더에서 X, Y pickle 파일을 로드합니다.
+    Load X, Y pickle files from the dataset directory.
     """
     x_path = os.path.join(data_dir, f'{dataset_name}_X.pkl')
     y_path = os.path.join(data_dir, f'{dataset_name}_Y.pkl')
@@ -46,7 +46,7 @@ def load_data(dataset_name: str, data_dir: str = 'dataset'):
     with open(y_path, 'rb') as f:
         Y = pickle.load(f)
     
-    # Y가 DataFrame이면 Series로 변환 (인덱싱 편의성)
+    # Convert DataFrame to Series for indexing convenience
     if isinstance(Y, pd.DataFrame):
         Y = Y.iloc[:, 0]
         

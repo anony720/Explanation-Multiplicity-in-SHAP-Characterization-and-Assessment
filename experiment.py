@@ -1,6 +1,6 @@
 import sys
 import os
-# Telemetry 비활성화 (가장 먼저 실행)
+# Disable telemetry (must run first)
 os.environ["SEGMENT_DISABLE"] = "1" 
 os.environ["POSTHOG_DISABLED"] = "1"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
@@ -14,19 +14,19 @@ import pandas as pd
 import shap
 from sklearn.model_selection import StratifiedKFold
 
-# 로컬 모듈 Import
+# Local module imports
 from utils import set_global_seed, clean_memory, load_data
 from models import train_model
 
 class Logger(object):
     def __init__(self, filename):
         self.terminal = sys.stdout
-        self.log = open(filename, "a")  # "a"는 append(이어쓰기), "w"는 덮어쓰기
+        self.log = open(filename, "a")  # "a" for append, "w" for overwrite
 
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
-        self.log.flush() # 바로바로 파일에 쓰도록 강제
+        self.log.flush() # Force immediate write to file
 
     def flush(self):
         self.terminal.flush()
@@ -41,8 +41,8 @@ def main():
     parser.add_argument('--split_seed', type=int, default=0, help='Seed for StratifiedKFold split (0-4)')
     parser.add_argument('--model_seed_idx', type=int, default=0, help='Index for model random seed list')
     parser.add_argument('--explainer_seed_idx', type=int, default=0, help='Index for explainer random seed list')
-    parser.add_argument('--chunk_idx', type=int, default=0, help='현재 조각 번호 (0부터 시작)')
-    parser.add_argument('--total_chunks', type=int, default=1, help='전체 조각 개수')
+    parser.add_argument('--chunk_idx', type=int, default=0, help='Current chunk index (0-based)')
+    parser.add_argument('--total_chunks', type=int, default=1, help='Total number of chunks')
     args = parser.parse_args()
 
     # Parameters
@@ -54,10 +54,10 @@ def main():
     CHUNK_IDX = args.chunk_idx
     TOTAL_CHUNKS = args.total_chunks
 
-    # experiment.py 내부
+    # Check for existing results to enable resumption
     save_path = f'results/{DATASET}_{MODEL}_{SPLIT_SEED}_{MODEL_SEED_IDX}_{EXPLAINER_SEED_IDX}_chunk{CHUNK_IDX}_sv.pkl'
 
-    # ★ 이 3줄이 핵심입니다. 꼭 넣으세요!
+    # Skip if result already exists
     if os.path.exists(save_path):
         print(f"[SKIP] Found existing result: {save_path}")
         return
@@ -65,10 +65,10 @@ def main():
     if not os.path.exists('log'):
         os.makedirs('log')
 
-    # 2. 로그 파일명 생성 (결과 파일명 규칙과 동일하게)
+    # 2. Generate log filename (follows result file naming convention)
     log_filename = f"log/{DATASET}_{MODEL}_{SPLIT_SEED}_{MODEL_SEED_IDX}_{EXPLAINER_SEED_IDX}.log"
     
-    # 3. 시스템 출력(stdout)을 가로채서 파일과 화면 양쪽에 쏨
+    # 3. Redirect stdout to both terminal and log file
     sys.stdout = Logger(log_filename)
     
     # Error log
@@ -104,7 +104,7 @@ def main():
     skf = StratifiedKFold(n_splits=FOLDS, shuffle=True, random_state=42)
 
     for i, (train_idx, test_idx) in enumerate(skf.split(X, Y)):
-        # 지정된 Split Seed(Fold)만 실행
+        # Only run the specified split seed (fold)
         if i == SPLIT_SEED:
             X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
             Y_train, Y_test = Y.iloc[train_idx], Y.iloc[test_idx]

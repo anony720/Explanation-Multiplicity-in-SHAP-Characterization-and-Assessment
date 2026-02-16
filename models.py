@@ -200,7 +200,7 @@ class TabPFNWrapper(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
         self._set_seed()
-        # SHAP 샘플링의 무작위성을 위해 추론 시 Seed 고정 안 함
+        # Do not fix seed at inference to preserve SHAP sampling randomness
         return self.model.predict_proba(X)
 
     def predict(self, X):
@@ -280,11 +280,11 @@ def train_model(X_train, Y_train, MODEL, MODEL_SEED, num_features, cat_features)
         print(f"Best Params: {grid.best_params_}")
         best_model = grid.best_estimator_
         
-        # GridSearch 객체 삭제로 메모리 확보
+        # Delete GridSearch object to free memory
         del grid
         clean_memory()
     else:
-        # TabPFN 등 튜닝 없는 경우
+        # No tuning needed (e.g., TabPFN)
         model.fit(X_train, Y_train)
         best_model = model    
     

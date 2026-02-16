@@ -115,6 +115,12 @@ Then run all cells sequentially. The notebook will:
 Repeat for each dataset by changing the `DATASET` variable.
 
 ---
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5c9c0f51-4508-456d-b5b2-e92af4072292" width="600" />
+  <br />
+  <em>Figure 2. SHAP sensitivity plot with German Credit dataset for model and explainer multiplicity
+</p>
+
 
 ## Citation
 

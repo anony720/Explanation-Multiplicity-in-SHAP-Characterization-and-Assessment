@@ -8,6 +8,8 @@ from sklearn.model_selection import GridSearchCV, ShuffleSplit
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+import scipy.sparse as sp
+from sklearn.metrics import make_scorer, roc_auc_score
 
 # Models
 from sklearn.linear_model import LogisticRegression
@@ -16,6 +18,7 @@ from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from rtdl_revisiting_models import FTTransformer
 from tabpfn import TabPFNClassifier
+
 
 from utils import clean_memory
 
@@ -200,12 +203,122 @@ class TabPFNWrapper(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
         self._set_seed()
-        # Do not fix seed at inference to preserve SHAP sampling randomness
+        # SHAP 샘플링의 무작위성을 위해 추론 시 Seed 고정 안 함
         return self.model.predict_proba(X)
 
     def predict(self, X):
         self._set_seed()
         return self.model.predict(X)
+
+
+# ---------------------------------------------------------
+# Torch Plain MLP Wrapper
+# ---------------------------------------------------------
+class TorchMLPClf(ClassifierMixin, BaseEstimator):
+
+    _estimator_type = "classifier"
+
+    def __init__(
+        self,
+        n_epochs=100,
+        batch_size=256,
+        lr=1e-3,
+        weight_decay=1e-4,
+        hidden_dims=(128, 64),
+        dropout=0.1,
+        device=None,
+        random_state=0,
+    ):
+        self.n_epochs = n_epochs
+        self.batch_size = batch_size
+        self.lr = lr
+        self.weight_decay = weight_decay
+        self.hidden_dims = hidden_dims
+        self.dropout = dropout
+        self.random_state = random_state
+        self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
+
+        self.model_ = None
+        self.classes_ = None
+
+    def _set_seed(self):
+        if self.random_state is not None:
+            torch.manual_seed(self.random_state)
+            np.random.seed(self.random_state)
+            if self.device == 'cuda':
+                torch.cuda.manual_seed_all(self.random_state)
+
+    def _build_model(self, input_dim: int) -> nn.Module:
+        layers = []
+        d = input_dim
+        for h in self.hidden_dims:
+            layers += [nn.Linear(d, h), nn.ReLU(), nn.Dropout(self.dropout)]
+            d = h
+        layers += [nn.Linear(d, 1)]  # binary logit
+        return nn.Sequential(*layers)
+
+    def _to_numpy(self, X):
+        # sklearn ColumnTransformer + OneHotEncoder => sparse
+        if sp.issparse(X):
+            X = X.toarray()
+        else:
+            X = X.values if hasattr(X, 'values') else X
+        return np.asarray(X, dtype=np.float32)
+
+    def fit(self, X, y):
+        self._set_seed()
+        self.classes_ = np.unique(y)
+
+        X_np = self._to_numpy(X)
+        y_np = y.values if hasattr(y, 'values') else y
+        y_np = np.asarray(y_np, dtype=np.float32).reshape(-1, 1)
+
+        X_t = torch.tensor(X_np, device=self.device)
+        y_t = torch.tensor(y_np, device=self.device)
+
+        self.model_ = self._build_model(X_np.shape[1]).to(self.device)
+
+        optimizer = torch.optim.AdamW(self.model_.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        loss_fn = nn.BCEWithLogitsLoss()
+
+        dataset = TensorDataset(X_t, y_t)
+        loader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
+
+        self.model_.train()
+        for epoch in range(self.n_epochs):
+            for xb, yb in loader:
+                optimizer.zero_grad()
+                logits = self.model_(xb)
+                loss = loss_fn(logits, yb)
+                loss.backward()
+                optimizer.step()
+
+        return self
+
+    def predict_proba(self, X):
+        self.model_.eval()
+        X_np = self._to_numpy(X)
+
+        probs = []
+        dataset = TensorDataset(torch.tensor(X_np))
+        loader = DataLoader(dataset, batch_size=1024, shuffle=False)
+
+        with torch.no_grad():
+            for (xb,) in loader:
+                xb = xb.to(self.device)
+                logits = self.model_(xb)
+                prob = torch.sigmoid(logits).cpu().numpy()
+                probs.append(prob)
+
+        prob_class_1 = np.concatenate(probs).flatten()
+        prob_class_0 = 1 - prob_class_1
+        return np.vstack([prob_class_0, prob_class_1]).T
+
+    def predict(self, X):
+        proba = self.predict_proba(X)
+        return (proba[:, 1] >= 0.5).astype(int)
+
+
 
 # ---------------------------------------------------------
 # Train Model Function
@@ -263,6 +376,10 @@ def train_model(X_train, Y_train, MODEL, MODEL_SEED, num_features, cat_features)
         elif MODEL == "xgb":
             clf = XGBClassifier(n_estimators=200, tree_method="hist", eval_metric="logloss", n_jobs=-1, random_state=MODEL_SEED)
             param_grid = {"clf__max_depth": [3, 5], "clf__learning_rate": [0.05, 0.1], "clf__subsample": [0.8, 1.0]}
+
+        elif MODEL == "mlp":
+            clf = TorchMLPClf(n_epochs=100, batch_size=256, lr=1e-3, weight_decay=1e-4, hidden_dims=(256, 128), dropout=0.1, device="cuda", random_state=MODEL_SEED)
+            param_grid = {"clf__hidden_dims": [(64,), (128,), (128, 64)], "clf__lr": [1e-3, 3e-4], "clf__weight_decay": [1e-4, 1e-3], "clf__dropout": [0.0, 0.1]}
         
         model = Pipeline(steps=[("preprocess", preprocess), ("clf", clf)])
 
@@ -278,13 +395,14 @@ def train_model(X_train, Y_train, MODEL, MODEL_SEED, num_features, cat_features)
         )
         grid.fit(X_train, Y_train)
         print(f"Best Params: {grid.best_params_}")
+        print("Best CV AUC:", grid.best_score_)
         best_model = grid.best_estimator_
         
-        # Delete GridSearch object to free memory
+        # GridSearch 객체 삭제로 메모리 확보
         del grid
         clean_memory()
     else:
-        # No tuning needed (e.g., TabPFN)
+        # TabPFN 등 튜닝 없는 경우
         model.fit(X_train, Y_train)
         best_model = model    
     

@@ -28,7 +28,7 @@ conda env create -f environment.yaml
 conda activate shap
 ```
 
-Key dependencies: `shap`, `torch`, `scikit-learn`, `xgboost`, `rtdl_revisiting_models`, `tabpfn`, `goodpoints`, `scienceplots`.
+Key dependencies: `shap`, `torch`, `scikit-learn`, `xgboost`, `rtdl_revisiting_models`, `goodpoints`, `scienceplots`.
 
 ---
 
@@ -46,7 +46,7 @@ Key dependencies: `shap`, `torch`, `scikit-learn`, `xgboost`, `rtdl_revisiting_m
 ├── experiment_true.py                 # KernelSHAP with full training set as background
 ├── experiment_proba.py                # Save model prediction probabilities
 │
-├── models.py                          # Model wrappers (DT, RF, XGB, MLP, FTT, TabPFN)
+├── models.py                          # Model wrappers (DT, RF, XGB, MLP, FTT)
 ├── utils.py                           # Seeding, memory management, data loading
 ├── plot_violin.py                     # Distance metrics and baseline computations
 ├── baseline.py                        # Randomized null-model baselines

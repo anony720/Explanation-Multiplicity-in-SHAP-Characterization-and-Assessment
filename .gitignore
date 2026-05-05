@@ -11,10 +11,8 @@ figures_pairwise/
 figures2/
 results/
 results_coalition/
-results_true/
 background_results/
 shap_values/
-proba/
 log/
 
 # Large/sensitive files

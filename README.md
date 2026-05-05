@@ -73,7 +73,27 @@ German, Diabetes, and ACS data are included in `dataset/`. To generate GMSC:
 python prepare_gmsc.py
 ```
 
-### Step 2 — Run experiments
+### Step 2 — Download precomputed SHAP results
+
+The main SHAP results (~800 MB) are hosted on Google Drive. Download and extract them into the repository root:
+
+```bash
+# Download
+gdown "https://drive.google.com/uc?id=1Hr5SikYiuKHwobmFQlatPKwaY02VswOe" -O results_tree.tar.gz
+
+# Extract
+tar -xzf results_tree.tar.gz
+
+# (Optional) remove the archive
+rm results_tree.tar.gz
+```
+
+This creates a `results_tree/` directory containing all precomputed SHAP value files.
+`results_true/` (full-background KernelSHAP) and `proba/` (prediction probabilities) are already included in this repository.
+
+If you prefer to run experiments from scratch, skip this step and proceed to Step 3.
+
+### Step 3 — Run experiments
 
 **Main experiment** (background sampling sensitivity):
 
@@ -124,7 +144,7 @@ python experiment_proba.py --dataset german --model ftt --split_seed 0
 
 Results are saved to `results_tree/` (bg_size=100) or `background_results/` (other bg sizes).
 
-### Step 3 — Generate figures
+### Step 4 — Generate figures
 
 Open and run the analysis notebooks in order:
 

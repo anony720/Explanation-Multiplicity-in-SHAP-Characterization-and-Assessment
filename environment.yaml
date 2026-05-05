@@ -31,3 +31,4 @@ dependencies:
     - tabpfn==6.0.6
     - rtdl-revisiting-models==0.0.2
     - folktables==0.0.12
+    - goodpoints==0.4.2

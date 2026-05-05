@@ -5,12 +5,30 @@ __pycache__/
 
 # Output directories
 figures/
+figures_bg/
+figures_tree/
+figures_pairwise/
 figures2/
 results/
+results_coalition/
+results_true/
+background_results/
+shap_values/
+proba/
 log/
 
 # Large/sensitive files
 *.pdf
+
+# Archives
+*.tar.gz
+
+# Log files
+log_*/
+log_*.txt
+
+# Dependency wheels
+wheels/
 
 # Old/experimental versions
 plot_refactored.py
@@ -19,3 +37,51 @@ plot_violin2.py
 7. Plots_Clean.ipynb
 7. Plots_Violin2.ipynb
 run_array.sbatch
+
+# Excluded experiments
+experiment_coalition.py
+experiment_leverage.py
+experiment_sampling2.py
+experiment.py
+leverageshap_sampler.py
+
+# Duplicate utility files
+models2.py
+utils2.py
+
+# Internal scripts
+gen_notebooks.py
+
+# Old notebooks
+coalition_sampling.ipynb
+coalition_table.ipynb
+sampling.ipynb
+sampling_pairwise.ipynb
+compare_shap.ipynb
+Plots_Violin.ipynb
+Background_Analysis.ipynb
+CTE_Analysis.ipynb
+DistMatching_Analysis.ipynb
+Inv_Leverage_Analysis.ipynb
+Leverage_Analysis.ipynb
+PredStratified_Analysis.ipynb
+
+# Background sweep (not ready yet)
+background_sweep.ipynb
+
+# Server/cluster scripts
+slurm/
+slurm2/
+run_acs_dt.sh
+run_acs_gmsc.sh
+run_acs_mlp.sh
+run_bgsize_gmsc_missing.sh
+run_bgsize_local.sh
+run_coalition_local.sh
+run_gmsc_leverage.sh
+run_gmsc.sh
+run_overnight.sh
+run.sh
+
+# Duplicate environment
+environment2.yaml

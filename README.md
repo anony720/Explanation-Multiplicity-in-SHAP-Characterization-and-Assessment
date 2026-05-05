@@ -1,11 +1,5 @@
 # Explanation Multiplicity in SHAP: Characterization and Assessment
 
-**Hyunseung Hwang, Seungeun Lee, Lucas Rosenblatt, Steven Euijong Whang, Julia Stoyanovich**
-
-*NeurIPS 2025*
-
-[![arXiv](https://img.shields.io/badge/arXiv-2601.12654-b31b1b.svg)](https://arxiv.org/abs/2601.12654)
-
 ---
 
 ## Overview
@@ -156,19 +150,7 @@ Calibration baselines (randomized null models) are computed via `baseline.py` / 
 
 ---
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e999faed-d61a-41d9-b705-647ba92d870f" width="600" />
+  <img src="figures_bg/1b_gmsc_random.png" width="700" />
   <br />
-  <em>Figure 2. SHAP sensitivity plot with German Credit dataset for model and explainer multiplicity
+  <em>BG seed vs. model seed sensitivity (GMSC, random background, all models)</em>
 </p>
-
-
-## Citation
-
-```bibtex
-@inproceedings{hwang2025multiplicity,
-  title     = {Explanation Multiplicity in {SHAP}: Characterization and Assessment},
-  author    = {Hwang, Hyunseung and Lee, Seungeun and Rosenblatt, Lucas and Whang, Steven Euijong and Stoyanovich, Julia},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year      = {2025}
-}
-```
